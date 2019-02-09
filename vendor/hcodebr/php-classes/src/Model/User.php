@@ -12,8 +12,7 @@ class User extends Model{
             ":LOGIN"=>$login
         ));
         if(count($results) === 0){
-            throw new \Exception("Invalid Data");
-            
+            throw new \Exception("Invalid Data");           
         }
         $data = $results[0];
 
@@ -51,6 +50,48 @@ class User extends Model{
     }
     public static function logout(){
         $_SESSION[User::SESSION] = null;
+    }
+    public static function listAll(){
+        $sql = new Sql();
+        return $sql->select("SELECT * FROM TB_USERS A INNER JOIN TB_PERSONS B USING(IDPERSON) ORDER BY B.DESPERSON");
+    }
+    public function save(){
+        $sql = new Sql();
+        $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
+            ":desperson"=>$this->getdesperson(),
+            ":deslogin"=>$this->getdeslogin(),
+            ":despassword"=>$this->getdespassword(),
+            ":desemail"=>$this->getdesemail(),
+            ":nrphone"=>$this->getnrphone(),
+            ":inadmin"=>$this->getinadmin()
+        ));
+        $this->setData($results[0]);
+    }
+    public function get($iduser){
+        $sql = new Sql();
+        $results = $sql->select("SELECT * FROM TB_USERS A INNER JOIN TB_PERSONS B USING(IDPERSON) WHERE A.IDUSER = :iduser", array(
+            ":iduser"=>$iduser
+        ));
+        $this->setData($results[0]);
+    }
+    public function update(){
+        $sql = new Sql();
+        $results = $sql->select("CALL sp_usersupdate_save(:iduser,:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
+            ":iduser"=>$this->getiduser(),
+            ":desperson"=>$this->getdesperson(),
+            ":deslogin"=>$this->getdeslogin(),
+            ":despassword"=>$this->getdespassword(),
+            ":desemail"=>$this->getdesemail(),
+            ":nrphone"=>$this->getnrphone(),
+            ":inadmin"=>$this->getinadmin()
+        ));
+        $this->setData($results[0]);
+    }
+    public function delete(){
+        $sql = new Sql();
+        $sql->query("CALL sp_users_delete(:iduser)", array(
+            ":iduser"=>$this->getiduser()
+        ));
     }
 
 }
